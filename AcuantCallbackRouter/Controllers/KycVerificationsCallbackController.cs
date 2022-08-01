@@ -53,6 +53,8 @@ public class KycVerificationsCallbackController : ControllerBase
         
         if (string.IsNullOrWhiteSpace(formData))
             return BadRequest();
+        
+        Logger.LogInformation("New callback from Acuant");
 
         var tasks = CallbackUrls.Select(url => ForwardRequest(url, formData)).ToArray();
 
@@ -71,6 +73,12 @@ public class KycVerificationsCallbackController : ControllerBase
             .WithHeader("Content-Length", formData.Length)
             .PostStringAsync(formData);
 
-        return resp.StatusCode == (int) HttpStatusCode.OK;
+        if (resp.StatusCode == (int) HttpStatusCode.OK)
+        {
+            Logger.LogInformation("Accepted - {Url}", url);
+        }
+
+        Logger.LogInformation("Rejected - {Url}", url);
+        return false;
     }
 }
