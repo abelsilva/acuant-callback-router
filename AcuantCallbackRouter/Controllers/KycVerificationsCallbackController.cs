@@ -76,6 +76,7 @@ public class KycVerificationsCallbackController : ControllerBase
         if (resp.StatusCode == (int) HttpStatusCode.OK)
         {
             Logger.LogInformation("Accepted - {Url}", url);
+            return true;
         }
 
         Logger.LogInformation("Rejected - {Url}", url);
