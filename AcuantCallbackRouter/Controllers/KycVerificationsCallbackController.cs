@@ -1,7 +1,9 @@
+using System.Net;
 using System.Text;
 using AcuantCallbackRouter.Config;
 using AcuantCallbackRouter.Exceptions;
 using AcuantCallbackRouter.Middleware;
+using Flurl.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AcuantCallbackRouter.Controllers;
@@ -59,8 +61,16 @@ public class KycVerificationsCallbackController : ControllerBase
         return tasks.Any(t => t.Result) ? Ok() : NotFound();
     }
 
-    private Task<bool> ForwardRequest(string url, string formData)
+    private async Task<bool> ForwardRequest(string url, string formData)
     {
-        throw new NotImplementedException();
+        var resp = await url
+            .AllowAnyHttpStatus()
+            .WithHeader("Authorization", $"Basic {BasicAuthValue}")
+            .WithHeader("Accept", "application/json")
+            .WithHeader("Content-Type", "application/json; charset=UTF-8")
+            .WithHeader("Content-Length", formData.Length)
+            .PostStringAsync(formData);
+
+        return resp.StatusCode == (int) HttpStatusCode.OK;
     }
 }
