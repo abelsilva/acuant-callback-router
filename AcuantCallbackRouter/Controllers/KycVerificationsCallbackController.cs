@@ -65,7 +65,7 @@ public class KycVerificationsCallbackController : ControllerBase
             if (newEval != null)
                 Logger.LogInformation("ID: {AcuantId} - State: {AcuantState}", newEval.Tid, newEval.GetState());
             else
-                Logger.LogInformation("Couldn't process data");
+                Logger.LogInformation("Couldn't process data: {FormData}", formData);
         }
         catch
         {
