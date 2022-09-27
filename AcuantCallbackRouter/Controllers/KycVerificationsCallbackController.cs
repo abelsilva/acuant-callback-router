@@ -69,7 +69,7 @@ public class KycVerificationsCallbackController : ControllerBase
         }
         catch
         {
-            // ignore
+            Logger.LogInformation("Couldn't process data: {FormData}", formData);
         }
 
         var tasks = CallbackUrls.Select(url => ForwardRequest(url, formData)).ToArray();
