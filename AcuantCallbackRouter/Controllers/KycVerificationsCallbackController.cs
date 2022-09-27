@@ -1,10 +1,12 @@
 using System.Net;
 using System.Text;
 using AcuantCallbackRouter.Config;
+using AcuantCallbackRouter.Data;
 using AcuantCallbackRouter.Exceptions;
 using AcuantCallbackRouter.Middleware;
 using Flurl.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace AcuantCallbackRouter.Controllers;
 
@@ -28,7 +30,7 @@ public class KycVerificationsCallbackController : ControllerBase
         if (CallbackUrls == null || !CallbackUrls.Any())
             throw new ConfigurationException("CallbackUrls missing from configuration");
     }
-    
+
     private ILogger<KycVerificationsCallbackController> Logger { get; }
     private string BasicAuthValue { get; }
     private string[] CallbackUrls { get; set; }
@@ -42,6 +44,7 @@ public class KycVerificationsCallbackController : ControllerBase
             Logger.LogWarning("Request received with empty username/password");
             return NotFound();
         }
+
         if (basicAuthHash != BasicAuthValue)
         {
             Logger.LogWarning("Request received with invalid username/password");
@@ -50,11 +53,24 @@ public class KycVerificationsCallbackController : ControllerBase
 
         using var reader = new StreamReader(Request.Body, Encoding.UTF8);
         var formData = await reader.ReadToEndAsync();
-        
+
         if (string.IsNullOrWhiteSpace(formData))
             return BadRequest();
-        
+
         Logger.LogInformation("New callback from Acuant");
+
+        try
+        {
+            var newEval = JsonConvert.DeserializeObject<NewEvaluationResponse>(formData);
+            if (newEval != null)
+                Logger.LogInformation("ID: {AcuantId} - State: {AcuantState}", newEval.Tid, newEval.GetState());
+            else
+                Logger.LogInformation("Couldn't process data");
+        }
+        catch
+        {
+            // ignore
+        }
 
         var tasks = CallbackUrls.Select(url => ForwardRequest(url, formData)).ToArray();
 
