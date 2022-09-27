@@ -57,7 +57,7 @@ public class KycVerificationsCallbackController : ControllerBase
         if (string.IsNullOrWhiteSpace(formData))
             return BadRequest();
 
-        Logger.LogInformation("New callback from Acuant");
+        Logger.LogInformation("New callback from Acuant (data length: {DataLength})", formData.Length);
 
         try
         {
@@ -65,7 +65,7 @@ public class KycVerificationsCallbackController : ControllerBase
             if (newEval != null)
                 Logger.LogInformation("ID: {AcuantId} - State: {AcuantState}", newEval.Tid, newEval.GetState());
             else
-                Logger.LogInformation("Couldn't process data: {FormData}", formData);
+                Logger.LogInformation("Couldn't process data: {Data}", formData);
         }
         catch
         {
