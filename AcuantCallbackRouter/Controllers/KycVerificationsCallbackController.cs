@@ -86,7 +86,7 @@ public class KycVerificationsCallbackController : ControllerBase
             .WithHeader("Authorization", $"Basic {BasicAuthValue}")
             .WithHeader("Accept", "application/json")
             .WithHeader("Content-Type", "application/json; charset=UTF-8")
-            .WithHeader("Content-Length", formData.Length)
+            .WithHeader("Content-Length", Encoding.UTF8.GetBytes(formData).Length)
             .PostStringAsync(formData);
 
         if (resp.StatusCode == (int) HttpStatusCode.OK)
